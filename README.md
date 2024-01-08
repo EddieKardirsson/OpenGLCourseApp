@@ -19,6 +19,11 @@ Otherwise, I'll provide with the links.
 GLEW: https://sourceforge.net/projects/glew/
 GLFW: https://www.glfw.org/download.html
 
+Also added the GLM (OpenGL Math Library) to the project's External Libs folder. It's set on the Additional Include Directories and
+ready to go. version 9.9.8 which is the latest stable build
+
+GLM: https://glm.g-truc.net/0.9.9/index.html
+
 
 This ReadMe is mainly as a note to self, but should be clear to anyone who wants to clone the repo.
 Hopefully, this will work and not break. I'll do a double check on my laptop later.
