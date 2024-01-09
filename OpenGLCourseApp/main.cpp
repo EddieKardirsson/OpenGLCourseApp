@@ -27,7 +27,7 @@
 const GLint WIDTH = 1000, HEIGHT = 750;
 const float TO_RADIANS = 3.14159265f / 180.f;
 
-GLuint VAO, VBO, shader, uniformModel;
+GLuint VAO, VBO, IBO, shader, uniformModel;
 
 bool direction = true;
 float triOffset = 0.f;
@@ -73,14 +73,27 @@ void main()																	\n\
 
 void CreateTriangle()
 {
-	GLfloat vertices[] = {
-		-1.f, -1.f, 0.f,
-		1.f, -1.f, 0.f,
-		0.f, 1.f, 0.f
+	unsigned int indices[] = {
+		0, 3, 1,
+		1, 3, 2,
+		2, 3, 0,
+		0, 1, 2
 	};
 
+	GLfloat vertices[] = {	// index: 
+		-1.f, -1.f, 0.f,	// 0
+		0.f, -1.f, 1.f,		// 1
+		1.f, -1.f, 0.f,		// 2
+		0.f, 1.f, 0.f		// 3
+	};
+
+	
 	glGenVertexArrays(1, &VAO);	// Params: Amount of arrays; Where to store the values and pass it by reference.
 	glBindVertexArray(VAO);			// Param: Bind the vertex array (VAO).
+
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 		glGenBuffers(1, &VBO);		// Params: Amount of arrays; values stored and pass by reference
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);		// Params: Which buffer, choose enum and in this case array buffer; The buffer to bind (VBO)
@@ -96,6 +109,7 @@ void CreateTriangle()
 		glBindBuffer(GL_ARRAY_BUFFER, 0);	// Unbind the VBO binding
 
 	glBindVertexArray(0);			// Unbind the VAO binding
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 }
 
@@ -213,6 +227,9 @@ int main()
 		return 3;
 	}
 
+	// Depth buffer
+	glEnable(GL_DEPTH_TEST);
+
 	// Setup Viewport Size
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
@@ -247,22 +264,24 @@ int main()
 
 		// Clear window
 		glClearColor(0.f, 0.f, 0.f, 1.f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(shader);
 
 		glm::mat4 model = glm::mat4(1.f);
 		//model = glm::translate(model, glm::vec3(triOffset, 0.f, 0.f));
-		//model = glm::rotate(model, curAngle * TO_RADIANS, glm::vec3(0.f, 0.f, 1.f));
+		model = glm::rotate(model, curAngle * TO_RADIANS, glm::vec3(0.f, 1.f, 0.f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.f));
 				
 		// Params: model location; amount; transpose; pointer to the value;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 			glBindVertexArray(VAO);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-				glDrawArrays(GL_TRIANGLES, 0, 3);
+					glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 		glUseProgram(0);
 
